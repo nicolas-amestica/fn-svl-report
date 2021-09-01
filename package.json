@@ -1,0 +1,16 @@
+{
+  "name": "",
+  "version": "",
+  "description": "",
+  "scripts": {
+    "test": "echo \"No tests yet...\"",
+    "start": "func start"
+  },
+  "author": "",
+  "dependencies": {
+    "dateformat": "^4.5.1",
+    "mssql": "^7.2.1",
+    "objects-to-csv-file": "^1.0.1",
+    "xlsx": "^0.17.1"
+  }
+}

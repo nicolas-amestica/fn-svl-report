@@ -1,0 +1,22 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsStorage": "",
+    "TMP_FOLDER": "tmp/",
+    "DB_HOST_USERS_HOST": "",
+    "DB_HOST_USERS_DBNAME": "",
+    "DB_HOST_USERS_USER": "",
+    "DB_HOST_USERS_PASSWORD": "",
+    "DB_HOST_PRODUCTS_HOST": "",
+    "DB_HOST_PRODUCTS_DBNAME": "",
+    "DB_HOST_PRODUCTS_USER": "",
+    "DB_HOST_PRODUCTS_PASSWORD": "",
+    "N_PRODUCT_REPORT": "Products",
+    "SENDGRID_API_KEY": "",
+    "SENDGRID_MAIL_FROM": "",
+    "SENDGRID_MAIL_TO": "",
+    "SENDGRID_MAIL_CC": "",
+    "SENDGRID_MAIL_BCC": ""
+  }
+}
