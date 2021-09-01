@@ -24,7 +24,6 @@ module.exports.getDataProducts = async (business, country) => {
         /** QUERY. */
         const query = `
             SELECT
-                TOP 100
                 prod.id AS Id_SVL,
                 prod_var.sku AS SKU,
                 prod_var.id AS ID_Variante,
