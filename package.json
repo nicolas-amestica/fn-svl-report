@@ -8,9 +8,14 @@
   },
   "author": "",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.7",
     "dateformat": "^4.5.1",
     "mssql": "^7.2.1",
+    "nodemailer": "^6.6.5",
+    "nodemailer-express-handlebars": "^4.0.0",
     "objects-to-csv-file": "^1.0.1",
+    "path": "^0.12.7",
+    "sendgrid": "^5.2.3",
     "xlsx": "^0.17.1"
   }
 }

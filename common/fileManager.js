@@ -1,5 +1,6 @@
 'use strict';
 const fs = require('fs').promises;
+const fss = require('fs');
 const ObjectsToCsv = require('objects-to-csv-file');
 const XLSX = require('xlsx')
 
@@ -124,3 +125,15 @@ module.exports.exportToXlsxFromObject = async (data, fileName) => {
     }
 
 };
+
+/**
+ * TITULO.
+ * @param {string} file: variable que contiene ruta del archivo.
+ * @return {String}: Respuesta String que indica la ruta y nombre del archivo que se generó, si falla envía una expceción.
+ */
+module.exports.base64_encode = async (file) => {
+
+    var bitmap = fss.readFileSync(file);
+    return new Buffer.from(bitmap).toString('base64');
+
+}
