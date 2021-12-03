@@ -6,7 +6,8 @@ const path = require('path')
 
 /**
  * Función que envía correos mediante un servidor smtp de Sendgrid.
- * @return {String}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
+ * @param {json} message: Objeto JSON que contiene los parámetros para configurar el mensaje y el template.
+ * @return {json}: Respuesta JSON que retorna un mensaje con información de acción satisfactoria y resultado del envío, si falla retorna excepción.
  */
 module.exports.sendFromSendgrid = async (message) => {
 

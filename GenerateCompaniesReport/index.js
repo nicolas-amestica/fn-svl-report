@@ -1,5 +1,10 @@
-'use strict';
-const management = require('./src/business');
+'use-strinct'
+const companyReport = require('./src/business');
+const { Responses } = require('../libs/responses')
+
+/** VARIABLES DE PARÁMETROS. */
+const arBusiness = [0, 1];
+const arCountries = ['CL', 'PE', 'AR', 'CO'];
 
 /**
  * Función de inicio. Recibe los parámetros de entrada que vienen de http request de tipo raw/json.
@@ -9,17 +14,59 @@ const management = require('./src/business');
  */
 module.exports = async function (context, req) {
 
-    /** DESTRUCTURACIÓN DE PARÁMETROS DE ENTRADA. */
-    const { country, business } = req.body;
+    try {
+    
+        /** DESTRUCTURACIÓN DE PARÁMETROS DE ENTRADA. */
+        const { business, country } = req.body;
+    
+        /** VALIDAR QUE BUSINESS SEA TIPO NUMÉRICO Y ESTE DENTRO DE LOS VALORES PERMITIDOS. */
+        if (typeof business != 'number' || !arBusiness.includes(business))
+            throw `Parámetro business debe ser numérico y estar en el rango ${arBusiness}.`
+    
+        /** VALIDAR QUE COUNTRY ESTE DENTRO DE LOS VALORES PERMITIDOS. */
+        if (country.length == 0 || !arCountries.includes(country))
+            throw `Parámetro country debe contener uno de los siguientes country_codes ${arCountries}.`
+        
+        /** OBTENER DATOS DE BD. */
+        let data = await companyReport.getDataCompanies(business, country);
+        if (data.error)
+            throw data;
+    
+        /** EXPORTAR DATA A ARCHIVO XLSX. */
+        data = await companyReport.exportToCSV(data, `${process.env.PROYECT}_${process.env.N_COMPANIE_REPORT}_${country}`);
+        if (data.error !== undefined || data.warn !== undefined)
+            throw data;
 
-    /** VALIDAR QUE SE INGRESEN LOS PARÁMETROS DE ENTRADA CORRESPONDIENTES. */
-    if (!business || !country)
-        return context.res = { status: 400, body: { error: 'Faltan parámetros de entrada.' } };
+        /** SUBIR ARCHIVO CSV AL BLOB STORAGE. */
+        const resultUploadFile = await companyReport.uploadFileFromPath(context, data)
+        if (resultUploadFile.error)
+            throw resultUploadFile
 
-    /** MÉTODO PARA GENERAR REPORTE. */
-    const result = await management.getReport(req.body);
+        /** ENVIAR EMAIL CON ENLACE DE DESCARGA DEL ARCHIVO. */
+        const resultSendEmail = await companyReport.sendEmail(business, country, resultUploadFile)
+        if (resultSendEmail.error !== undefined)
+            throw resultSendEmail;
 
-    /** RETORNO DE RESPUESTA. */
-    context.res = result;
+        /** ELIMINAR DIRECTORIO PARA ARCHIVOS TEMPORALES. */
+        const resultDeleteFile = await companyReport.deleteFile()
+        if (resultDeleteFile.error)
+            throw resultDeleteFile;
+
+        data.url = resultUploadFile.url;
+            
+        /** RETORNO DE RESPUESTA. */
+        context.res = Responses._200({
+            message: "Reporte generado correctamente.",
+            data
+        });
+
+    } catch (error) {
+
+        /** RETORNO DE EXCEPCIÓN. */
+        context.res = Responses._400({
+            error
+        })
+
+    }
 
 }

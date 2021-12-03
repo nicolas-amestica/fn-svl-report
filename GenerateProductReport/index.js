@@ -27,17 +27,17 @@ module.exports = async function (context, req) {
         if (country.length == 0 || !arCountries.includes(country))
             throw `Parámetro country debe contener uno de los siguientes country_codes ${arCountries}.`
         
-        /** OBTENER DATOS DE GOOGLE CLOUD PLATFORM. */
+        /** OBTENER DATOS DE BD. */
         let data = await productReport.getDataProducts(business, country);
         if (data.error)
             throw data;
     
-        /** OBTENER DATOS DE GOOGLE CLOUD PLATFORM. */
+        /** OBTENER DATOS DE BD. */
         let companies = await productReport.getDataCompanies(business, country, data.companies);
         if (companies.error !== undefined)
             throw companies;
     
-        /** OBTENER DATOS DE GOOGLE CLOUD PLATFORM. */
+        /** MAPEAR DATOS OBTENIDOS. */
         data = await productReport.mapData(data.products, companies);
         if (data.error)
             throw data;

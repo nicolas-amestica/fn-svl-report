@@ -6,7 +6,6 @@ const fs = require('fs');
 const fileManager = require('../../libs/fileManager');
 const dateFormat = require('dateformat');
 const blobStorage = require('../../libs/blobStorage');
-const path = require("path");
 const email = require('../../libs/email');
 
 /**
@@ -288,7 +287,9 @@ module.exports.uploadFileFromPath = async (context, fullFileName) => {
 
 /**
  * Función que envía email según los parámetros que se configuren.
- * @param {[Json]} urlFiles: Arreglo de objeto con los datos (incluyendo la url) subidos al Blob Storage.
+ * @param {Integer} business: Variable numérica que contiene si es sodimac o falabella.
+ * @param {string} country: Variable string que contiene el pais.
+ * @param {Json} documento: Json que contiene la url del archivo local y el nombre del archivo.
  * @return {Json}: Respuesta JSON de la función que retorna el resultado del envío del email, incluye respuesta satisfactoria o fallo.
  */
 module.exports.sendEmail = async (business, country, documento) => {
@@ -313,7 +314,7 @@ module.exports.sendEmail = async (business, country, documento) => {
             // bcc: bc.split(','),
             subject: `Reporte products ${country}`,
             html: `Estimados,<br><br>
-            En el siguiente enlace podrá descargar el reporte Products ${business}${country}<br><br>
+            En el siguiente enlace podrás descargar el reporte products ${business}${country}<br><br>
             <a href='${documento.url}'>DESCARGAR</a><br><br>
             Atte.<br>
             ${process.env.REPORTA}`,
