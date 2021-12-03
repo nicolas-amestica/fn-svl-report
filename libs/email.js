@@ -1,6 +1,5 @@
 'use strict';
 const sgMail = require('@sendgrid/mail');
-const { log } = require('console');
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path')
@@ -9,31 +8,20 @@ const path = require('path')
  * Función que envía correos mediante un servidor smtp de Sendgrid.
  * @return {String}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
-module.exports.sendFromSendgrid = async (message, attachment) => {
-
-    /**   ************* EN CONSTRUCCIÓN *************  */
+module.exports.sendFromSendgrid = async (message) => {
 
     try {
 
-        const msg = {
-            from: message.from,
-            to: message.from,
-            cc: message.cc,
-            subject: message.subject,
-            text: message.text,
-            attachments: [attachment],
-        };
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-            
-        let resp = await sgMail.send(msg);
+
+        let resp = await sgMail.send(message);
 
         return resp;
 
     } catch (error) {
 
         /** CAPTURA ERROR. */
-        console.log(error);
-        return { error: error }
+        return { error }
 
     }
 

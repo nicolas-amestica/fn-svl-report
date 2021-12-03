@@ -1,12 +1,10 @@
 'use strict';
-const mySQL = require('../../../common/mySQL');
+const mySQL = require('../../../libs/mySQL');
 const sql = require("mssql");
 const fs = require('fs');
-const fileManager = require('../../../common/fileManager');
+const fileManager = require('../../../libs/fileManager');
 const dateFormat = require('dateformat');
-// const blobStorage = require('../../../common/blobStorage');
-const email = require('../../../common/email');
-// const path = require("path");
+const email = require('../../../libs/email');
 
 /**
  * Obtiene los datos de las empresas de la base de datos de usuarios.
@@ -210,53 +208,6 @@ module.exports.uploadFileFromPath = async (fullFileName) => {
 module.exports.sendEmail = async (business, country, fileName) => {
 
     try {
-
-        /** VALIDA QUE EL PARÁMETRO DE ENTRADA TENGA CONTENIDO. */
-        // if (Object.keys(urlFiles).length == 0)
-        //     return { status: 400, body: { message: 'No se pudo enviar el email.', detalle: 'No se ha podido obtener la url del archivo.' }, error: {} };
-
-        /** ITERAR ARREGLO DE OBJETO AGREGANDO URL Y NOMBRE A LA VARIABLE URLTAG. */
-        // for (const file of Object.keys(urlFiles)) {
-        //     urlTag.push({url: urlFiles[file].url, name: (path.basename(urlFiles[file].url, '.xlsx')).toUpperCase() })
-        // }
-
-        /** CONFIGURAR PARÁMETROS DEL EMAIL. */
-        // let configEmail = {
-        //     from: process.env.GMAIL_AUTH_USER,
-        //     to: process.env.SENDGRID_MAIL_TO,
-        //     cc: process.env.SENDGRID_MAIL_CC,
-        //     bcc: process.env.SENDGRID_MAIL_BCC,
-        //     subject: `PROCESO LIQUIDACIÓN ${dateFormat(new Date(), "yyyy-mm-dd")}`,
-        //     template: 'settlement',
-        //     context: {
-        //         dear: 'Estimados,',
-        //         message: 'Se inicia proceso liquidación adjuntanto el informe inicial denominado InformeSKU:',
-        //         urlTag: urlTag,
-        //         greeting: 'Atte.',
-        //         sender: 'Nicolás Améstica Vidal'
-        //     }
-        // }
-
-        /** CONFIGURAR PARÁMETROS DE HBS. */
-        // const optionsHBS = {
-        //     partialsDir: 'shared/views/email',
-        //     viewPath: '../shared/views/email'
-        // }
-
-        // var data = fs.readFileSync(`${process.env.TMP_FOLDER}${fileName}.csv`, { encoding: 'utf-8'}).toString('base64');
-
-
-
-        // console.log('FILE:', `${process.env.TMP_FOLDER}${fileName}.csv`);
-        // console.log('BASE64:', data);
-
-        // const attachment = {
-        //     content: fs.readFileSync(`${process.env.TMP_FOLDER}${fileName}.csv`, { encoding: 'utf-8'}).toString('base64'),
-        //     filename: `${fileName}.csv`,
-        //     type: 'text/csv',
-        //     disposition: 'attachment',
-        //     content_id: 'mytext'
-        // }
 
         let from = (business == 1 ? process.env.SENDGRID_MAIL_FROM_SODIMAC : process.env.SENDGRID_MAIL_FROM_FALABELLA);
         let to = (business == 1 ? process.env.SENDGRID_MAIL_TO_SODIMAC : process.env.SENDGRID_MAIL_TO_FALABELLA);

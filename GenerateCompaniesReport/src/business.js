@@ -45,10 +45,10 @@ module.exports.getReport = async (event) => {
         if (resultSendEmail.error !== undefined)
             return resultSendEmail;
 
-        // /** ELIMINAR DIRECTORIO PARA ARCHIVOS TEMPORALES. */
-        // const resultDeleteFile = await companieReport.deleteFile()
-        // if (resultDeleteFile.error !== undefined)
-        //     return resultDeleteFile;
+        /** ELIMINAR DIRECTORIO PARA ARCHIVOS TEMPORALES. */
+        const resultDeleteFile = await companieReport.deleteFile()
+        if (resultDeleteFile.error !== undefined)
+            return resultDeleteFile;
 
         /** RETORNO DE RESPUESTA EXITOSA. */
         // return { body: { message: 'Reporte generado y enviado por correo correctamente.', data }};
