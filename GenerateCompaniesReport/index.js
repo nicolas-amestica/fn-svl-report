@@ -3,8 +3,8 @@ const companyReport = require('./src/business');
 const { Responses } = require('../libs/responses')
 
 /** VARIABLES DE PARÁMETROS. */
-const arBusiness = [0, 1];
-const arCountries = ['CL', 'PE', 'AR', 'CO'];
+// const arBusiness = [0, 1];
+// const arCountries = ['CL', 'PE', 'AR', 'CO'];
 
 /**
  * Función de inicio. Recibe los parámetros de entrada que vienen de http request de tipo raw/json.
@@ -12,61 +12,48 @@ const arCountries = ['CL', 'PE', 'AR', 'CO'];
  * @param {json} req: Variable de entrada. Contiene el conexto de la petición.
  * @return {json}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
-module.exports = async function (context, req) {
+module.exports = async function (context, timerCompaniesReport) {
 
-    try {
+    /** DESTRUCTURACIÓN DE PARÁMETROS DE ENTRADA. */
+    // const { business, country } = req.body;
+
+    /** VALIDAR QUE BUSINESS SEA TIPO NUMÉRICO Y ESTE DENTRO DE LOS VALORES PERMITIDOS. */
+    // if (typeof business != 'number' || !arBusiness.includes(business))
+    //     return context.res = Responses._400({ error: `Parámetro business debe ser numérico y estar en el rango ${arBusiness}.` });
+
+    /** VALIDAR QUE COUNTRY ESTE DENTRO DE LOS VALORES PERMITIDOS. */
+    // if (country.length == 0 || !arCountries.includes(country))
+    //     return context.res = Responses._400({ error: `Parámetro country debe contener uno de los siguientes country_codes ${arCountries}.` });
+
+    const business = 1;
+    const country = 'CL';
     
-        /** DESTRUCTURACIÓN DE PARÁMETROS DE ENTRADA. */
-        const { business, country } = req.body;
-    
-        /** VALIDAR QUE BUSINESS SEA TIPO NUMÉRICO Y ESTE DENTRO DE LOS VALORES PERMITIDOS. */
-        if (typeof business != 'number' || !arBusiness.includes(business))
-            throw `Parámetro business debe ser numérico y estar en el rango ${arBusiness}.`
-    
-        /** VALIDAR QUE COUNTRY ESTE DENTRO DE LOS VALORES PERMITIDOS. */
-        if (country.length == 0 || !arCountries.includes(country))
-            throw `Parámetro country debe contener uno de los siguientes country_codes ${arCountries}.`
+    /** OBTENER DATOS DE BD. */
+    let data = await companyReport.getDataCompanies(business, country);
+    if (data.error)
+        return context.res = Responses._400({ error: data.error } );
+
+    /** EXPORTAR DATA A ARCHIVO CSV. */
+    data = await companyReport.exportToCSV(data, `${process.env.PROYECT}_${process.env.N_COMPANIE_REPORT}_${country}`);
+    if (data.error)
+        return context.res = Responses._400({ error: data.error } );
+
+    /** SUBIR ARCHIVO CSV AL BLOB STORAGE. */
+    let resultUploadFile = await companyReport.uploadFileFromPath(data)
+    if (resultUploadFile.error)
+        return context.res = Responses._400({ error: resultUploadFile.error } );
+
+    /** ELIMINAR DIRECTORIO PARA ARCHIVOS TEMPORALES. */
+    let resultDeleteFile = await companyReport.deleteFolder()
+    if (resultDeleteFile.error)
+        return context.res = Responses._400({ error: resultDeleteFile.error } );
+
+    data.url = resultUploadFile.url;
         
-        /** OBTENER DATOS DE BD. */
-        let data = await companyReport.getDataCompanies(business, country);
-        if (data.error)
-            throw data;
-    
-        /** EXPORTAR DATA A ARCHIVO XLSX. */
-        data = await companyReport.exportToCSV(data, `${process.env.PROYECT}_${process.env.N_COMPANIE_REPORT}_${country}`);
-        if (data.error !== undefined || data.warn !== undefined)
-            throw data;
-
-        /** SUBIR ARCHIVO CSV AL BLOB STORAGE. */
-        const resultUploadFile = await companyReport.uploadFileFromPath(context, data)
-        if (resultUploadFile.error)
-            throw resultUploadFile
-
-        /** ENVIAR EMAIL CON ENLACE DE DESCARGA DEL ARCHIVO. */
-        const resultSendEmail = await companyReport.sendEmail(business, country, resultUploadFile)
-        if (resultSendEmail.error !== undefined)
-            throw resultSendEmail;
-
-        /** ELIMINAR DIRECTORIO PARA ARCHIVOS TEMPORALES. */
-        const resultDeleteFile = await companyReport.deleteFile()
-        if (resultDeleteFile.error)
-            throw resultDeleteFile;
-
-        data.url = resultUploadFile.url;
-            
-        /** RETORNO DE RESPUESTA. */
-        context.res = Responses._200({
-            message: "Reporte generado correctamente.",
-            data
-        });
-
-    } catch (error) {
-
-        /** RETORNO DE EXCEPCIÓN. */
-        context.res = Responses._400({
-            error
-        })
-
-    }
+    /** RETORNO DE RESPUESTA. */
+    context.res = Responses._200({
+        message: "Reporte generado correctamente.",
+        data
+    });
 
 }

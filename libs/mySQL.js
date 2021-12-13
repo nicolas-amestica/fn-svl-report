@@ -1,4 +1,5 @@
 'use strict';
+const sql = require('mssql')
 
 /** VARIABLE QUE CONFIGURA LAS VARIABLES DE CONEXIÓN. */
 let configUsuarios = {
@@ -29,52 +30,71 @@ let configProductos = {
 };
 
 /**
- * Función que valida que todos los campos de la conexión existan.
+ * Función que ejecuta la consulta sql que se ingrese.
+ * @param {String} query: String que contiene la query a ejecutar.
  * @return {String}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
-module.exports.validarConexionUsuarios = async () => {
+module.exports.getDataProducts = async (query) => {
 
-    let message = [];
+    try {
 
-    if (!configUsuarios.server)
-        message.push("No está configurado el host del servidor de base de datos");
+        const conn = await sql.connect(configProductos);
 
-    if (!configUsuarios.database)
-        message.push("No está configurado el nombre del servidor de base de datos");
+        const result = await conn.request().query(query);
 
-    if (!configUsuarios.user)
-        message.push("No está configurado el usuario del servidor de base de datos");
+        return result.recordset;
 
-    if (!configUsuarios.password)
-        message.push("No está configurada la clave del servidor de base de datos");
+    } catch (error) {
 
-    return message;
+        return { error: error.originalError }
 
-}
+    }
+
+};
 
 /**
- * Función que valida que todos los campos de la conexión existan.
+ * Función que ejecuta la consulta sql que se ingrese.
+ * @param {String} query: String que contiene la query a ejecutar.
  * @return {String}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
-module.exports.validarConexionProductos = async () => {
+module.exports.getDataUsers = async (query) => {
 
-    let message = [];
+    try {
 
-    if (!configProductos.server)
-        message.push("No está configurado el host del servidor de base de datos");
+        const conn = await sql.connect(configUsuarios);
 
-    if (!configProductos.database)
-        message.push("No está configurado el nombre del servidor de base de datos");
+        const result = await conn.request().query(query);
 
-    if (!configProductos.user)
-        message.push("No está configurado el usuario del servidor de base de datos");
+        return result.recordset;
 
-    if (!configProductos.password)
-        message.push("No está configurada la clave del servidor de base de datos");
+    } catch (error) {
 
-    return message;
+        return { error: error.originalError }
 
-}
+    }
+
+};
+
+/**
+ * Función que ejecuta la consulta sql que se ingrese.
+ * @param {String} query: String que contiene la query a ejecutar.
+ * @return {String}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
+ */
+module.exports.closeConnection = async () => {
+
+    try {
+
+        await sql.close();
+
+        return 1;
+
+    } catch (error) {
+
+        return { error }
+
+    }
+
+};
 
 /** EXPONER VARIABLES DE CONFIGURACIÓN DE LA CONEXIÓN A LA BASE DE DATOS. */
 exports.configUsuarios = configUsuarios;

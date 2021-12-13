@@ -1,11 +1,9 @@
 'use strict';
-const mySQL = require('../../libs/mySQL');
-const sql = require("mssql");
+const MySQL = require('../../libs/mySQL');
 const fs = require('fs');
-const fileManager = require('../../libs/fileManager');
-const dateFormat = require('dateformat');
-const blobStorage = require('../../libs/blobStorage');
-const email = require('../../libs/email');
+const FileManager = require('../../libs/fileManager');
+const DateFormat = require('dateformat');
+const BlobStorage = require('../../libs/blobStorage');
 
 /**
  * Obtiene los datos de las empresas de la base de datos de usuarios.
@@ -15,13 +13,10 @@ module.exports.getDataCompanies = async (business, country) => {
 
     try {
 
-        /** CREAR CONEXIÓN A BASE DE DATOS MYSQL. */
-        let valida = await mySQL.validarConexionUsuarios();
-        if (valida.length > 0) throw 'No se pudo validar la conexión a productos.';
-        let pool = await sql.connect(mySQL.configUsuarios);
+        console.log('OBTENIENDO INFORMACIÓN DE USUARIOS');
 
         /** QUERY. */
-        const query = `
+        let query = `
             SELECT
                 com.id 'ID SVL: Company ID',
                 com.rut 'RUT',
@@ -67,19 +62,21 @@ module.exports.getDataCompanies = async (business, country) => {
         `;
 
         /** EJECUCIÓN DE QUERY. */
-        const data = await pool.request().query(query);
-        if (!data)
-            throw 'No se pudo consultar las companies.';
+        let data = await MySQL.getDataUsers(query);
+        if (data.error)
+            throw data.error;
 
         /** CERRAR CONEXIÓN A SQL. */
-        sql.close();
+        let con = await MySQL.closeConnection();
+        if (con.error)
+            throw con.error;
 
         /** RETORNO RESPUESTA. */
-        return data.recordset;
+        return data;
 
     } catch (error) {
 
-        /** CAPTURA ERROR. */
+        /** CAPTURA EXCEPCIÓN. */
         return { error };
 
     }
@@ -88,46 +85,7 @@ module.exports.getDataCompanies = async (business, country) => {
 
 /**
  * Exportar los datos de finanzas a un archivo csv. Este es almacenado en la carpeta temporal tmp ubicada en la raíz del proyecto.
- * @param {[Json]} data: Arreglo de objetos que contiene data, name y header.
- * @param {String} fileName: Nombre del archivo a generar.
- * @return {String}: Respuesta String que indica la ruta y nombre del archivo que se generó, si falla envía una expceción.
- */
-module.exports.exportToXlsxFromObject = async (data, fileName) => {
-
-    try {
-
-        /** VALIDAR QUE LA VARIABLE DAT TENGA CONTENIDO. */
-        if (data.length == 0)
-            throw 'No existen datos a exportar.'
-
-        /** CREAR CARPETA TEMPORAL. */
-        const dir = './tmp';
-        if (!fs.existsSync(dir))
-            fs.mkdirSync(dir);
-
-        /** CREAR NOMBRE DEL ARCHIVO A BASE DE FECHA NUMÉRICA. */
-        const fullFileName = `${fileName}_${dateFormat(new Date(), "yymmddHMM")}`;
-
-        /** ENVIAR A EXPORTAR DATA A UN ARCHIVO XLSX. */
-        const resultado = await fileManager.exportToXlsxFromObject(data, fullFileName);
-        if (resultado.error)
-            throw 'No se ha podido generar archivo xlsx.'
-
-        /** RETORNO RESPUESTA. */
-        return resultado;
-
-    } catch (error) {
-
-        /** CAPTURA ERROR. */
-        return { error };
-
-    }
-
-}
-
-/**
- * Exportar los datos de finanzas a un archivo csv. Este es almacenado en la carpeta temporal tmp ubicada en la raíz del proyecto.
- * @param {[Json]} data: Arreglo de objetos.
+ * @param {[Json]} data: Arreglo de objetos que contiene la data a exportar.
  * @param {String} fileName: Nombre del archivo a generar.
  * @return {[Json]}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
@@ -135,29 +93,31 @@ module.exports.exportToCSV = async (data, fileName) => {
 
     try {
 
+        console.log('EXPORTANDO DATOS A ARCHIVO CSV');
+
         /** VALIDAR QUE LA VARIABLE DAT TENGA CONTENIDO. */
         if (data.length == 0)
-            throw "No existen datos a exportar.";
+            throw 'No existen datos a exportar.';
 
         /** CREAR CARPETA TEMPORAL. */
-        const dir = './tmp';
+        const dir = `./${process.env.TMP_FOLDER}`;
         if (!fs.existsSync(dir))
             fs.mkdirSync(dir);
 
         /** CREAR NOMBRE DEL ARCHIVO A BASE DE FECHA NUMÉRICA. */
-        const fullFileName = `${fileName}_${dateFormat(new Date(), "yyyymmddHMM")}`;
+        const fullFileName = `${fileName}_${DateFormat(new Date(), "yyyymmddHMM")}`;
 
         /** ENVIAR A EXPORTAR DATA A UN ARCHIVO CSV. */
-        const resultado = await fileManager.exportDataToCSV(data, fullFileName);
+        let resultado = await FileManager.exportDataToCSV(data, fullFileName);
         if (resultado.error)
-            throw "No existen datos a exportar.";
+            throw resultado.error;
 
         /** RETORNO RESPUESTA. */
         return resultado;
 
     } catch (error) {
 
-        /** CAPTURA ERROR. */
+        /** CAPTURA EXCEPCIÓN. */
         return { error }
 
     }
@@ -169,12 +129,14 @@ module.exports.exportToCSV = async (data, fileName) => {
  * @param {String} fullFileName: Nombre del archivo a subir.
  * @return {json}: Respuesta JSON de la función que retorna el resultado del upload del archivo (incluye URL), incluye respuesta satisfactoria o fallo.
  */
-module.exports.uploadFileFromPath = async (context, fullFileName) => {
+module.exports.uploadFileFromPath = async (fullFileName) => {
 
     try {
 
+        console.log('SUBIENDO ARCHIVO A BLOB STORAGE');
+
         /** ENVIAR A SUBIR ARCHIVO AL BLOB STORAGE. */
-        let result = await blobStorage.uploadFileFromLocal(process.env.AZURE_BLOBSTORAGE_NAME, fullFileName.name, fullFileName.path);
+        let result = await BlobStorage.uploadFileFromLocal(process.env.AZURE_BLOBSTORAGE_NAME_COMPANIES, fullFileName.name, fullFileName.path);
         if (result.error)
             throw result.error;
 
@@ -183,60 +145,8 @@ module.exports.uploadFileFromPath = async (context, fullFileName) => {
 
     } catch (error) {
 
-        /** CAPTURA ERROR. */
+        /** CAPTURA EXCEPCIÓN. */
         return { error }
-
-    }
-
-}
-
-/**
- * Función que envía email según los parámetros que se configuren.
- * @param {Integer} business: Variable numérica que contiene si es sodimac o falabella.
- * @param {string} country: Variable string que contiene el pais.
- * @param {Json} documento: Json que contiene la url del archivo local y el nombre del archivo.
- * @return {Json}: Respuesta JSON de la función que retorna el resultado del envío del email, incluye respuesta satisfactoria o fallo.
- */
-module.exports.sendEmail = async (business, country, documento) => {
-
-    try {
-
-        if (!documento.url)
-            throw 'No se ha podido obtener la url del documento.';
-
-        let from = (business == 1 ? process.env.SENDGRID_MAIL_FROM_SODIMAC : process.env.SENDGRID_MAIL_FROM_FALABELLA);
-        let to = (business == 1 ? process.env.SENDGRID_MAIL_TO_SODIMAC : process.env.SENDGRID_MAIL_TO_FALABELLA);
-        let cc = (business == 1 ? process.env.SENDGRID_MAIL_CC_SODIMAC : process.env.SENDGRID_MAIL_CC_FALABELLA);
-        let bcc = (business == 1 ? process.env.SENDGRID_MAIL_BCC_SODIMAC : process.env.SENDGRID_MAIL_BCC_FALABELLA);
-
-        business = (business == 1 ? 'SO' : 'FA');
-
-        /** CONFIGURAR PARÁMETROS DEL EMAIL. */
-        const message = {
-            from: from,
-            to: to.split(','),
-            // cc: cc.split(','),
-            // bcc: bc.split(','),
-            subject: `Reporte companies ${country}`,
-            html: `Estimados,<br><br>
-            En el siguiente enlace podrás descargar el reporte companies ${business}${country}<br><br>
-            <a href='${documento.url}'>DESCARGAR</a><br><br>
-            Atte.<br>
-            ${process.env.REPORTA}`,
-        }
-
-        /** LLAMADA A MÉTODO QUE ENVÍA EMAIL ENVIÁNDOLE DOS PARÁMETROS. */
-        let result = await email.sendFromSendgrid(message);
-        if (result.error)
-            throw result;
-
-        /** RETORNO RESPUESTA. */
-        return result;
-
-    } catch (error) {
-
-        /** CAPTURA ERROR. */
-        return { error };
 
     }
 
@@ -246,19 +156,22 @@ module.exports.sendEmail = async (business, country, documento) => {
  * Eliminar directorio de carpeta temporal.
  * @return {boolean}: Respuesta de la función con la información procesada en la function, incluye respuesta satisfactoria o fallo.
  */
-module.exports.deleteFile = async () => {
+module.exports.deleteFolder = async () => {
 
     try {
+
+        console.log('ELIMINANDO DIRECTORIO TEMPORAL');
 
         /** ELIMINAR CARPETA TEMPORALES. */
         fs.rmdirSync(process.env.TMP_FOLDER, { recursive: true });
 
+        /** RETORNO RESPUESTA. */
         return true;
 
     } catch (error) {
 
-        /** CAPTURA ERROR. */
-        return { error: 'No se pudo eliminar el directorio temporal.' + error}
+        /** RETORNO EXCEPCIÓN. */
+        return { error }
 
     }
 

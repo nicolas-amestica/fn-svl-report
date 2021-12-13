@@ -1,19 +1,8 @@
 {
-  "bindings": [
-    {
-      "authLevel": "function",
-      "type": "httpTrigger",
-      "direction": "in",
-      "name": "req",
-      "methods": [
-        "post"
-      ],
-      "route": "reports/companies/allCompaniesByCountry"
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "res"
-    }
-  ]
+  "bindings": [{
+    "name": "timerCompaniesReport",
+    "type": "timerTrigger",
+    "direction": "in",
+    "schedule": "0 0 7 * * *"
+  }]
 }

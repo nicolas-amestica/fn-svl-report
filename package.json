@@ -1,22 +1,16 @@
 {
-  "name": "",
-  "version": "",
-  "description": "",
+  "name": "fn-svl-report",
+  "version": "1.0.0",
+  "description": "Proyecto que genera reporte de productos y companies",
   "scripts": {
-    "test": "echo \"No tests yet...\"",
     "start": "func start"
   },
-  "author": "",
+  "author": "Nicolás Améstica Vidal",
   "dependencies": {
     "@azure/storage-blob": "^12.8.0",
-    "@sendgrid/mail": "^7.6.0",
     "dateformat": "^4.5.1",
     "mssql": "^7.2.1",
-    "nodemailer": "^6.6.5",
-    "nodemailer-express-handlebars": "^4.0.0",
     "objects-to-csv-file": "^1.0.1",
-    "path": "^0.12.7",
-    "sendgrid": "^5.2.3",
-    "xlsx": "^0.17.1"
+    "path": "^0.12.7"
   }
 }
