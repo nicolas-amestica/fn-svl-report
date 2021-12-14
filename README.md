@@ -1,7 +1,7 @@
 # FN-SVL-REPORT
-## Proyecto Azure Serverless con Nodejs que genera reporte de productos.
+## Proyecto Azure Serverless con Nodejs que genera reporte de productos y compañias.
 ### Las tecnologías utilizadas son:
-- Azure function core tools.
+- Azure function core tools v3.
 - Nodejs v14.17.3
 ### Endpoints:
 El proyecto contiene los siguientes endpoints:
@@ -21,6 +21,8 @@ El endpoint tiene un header con clave 'code' y valor ''
 
 ## INSTALACIÓN
 ### Instalar las siguientes dependencias:
+
+#### Nodejs
 Requiere [Node.js](https://nodejs.org/) v14.157.3.
 ```sh
 - npm install
@@ -30,3 +32,18 @@ Iniciar proyecto
 ```sh
 npm start
 ```
+
+#### Azure Functions Core Tools
+Requiere [Azure Function Core Tools] (https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cmacos%2Ccsharp%2Cportal%2Cbash%2Ckeda) v3
+```sh
+- brew tap azure/functions
+```
+```sh
+- brew install azure-functions-core-tools@3
+```
+Si estás subiendo de versión desde la 2.0x instala lo siguiente:
+```sh
+- brew link --overwrite azure-functions-core-tools@3
+```
+
+
